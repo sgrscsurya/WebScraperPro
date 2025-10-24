@@ -3,6 +3,7 @@ import { Code2, History, Sparkles, Moon, Sun } from 'lucide-react';
 import ScraperForm, { ScrapeType } from './components/ScraperForm';
 import ResultsDisplay from './components/ResultsDisplay';
 import HistoryPanel from './components/HistoryPanel';
+import WelcomeLanding from './components/WelcomeLanding';
 import { supabase } from './lib/supabase';
 import { useTheme } from './contexts/ThemeContext';
 
@@ -23,6 +24,11 @@ function App() {
   const [currentResult, setCurrentResult] = useState<ScrapingResult | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  const handleGetStarted = () => {
+    setShowWelcome(false);
+  };
 
   const handleScrape = async (url: string, scrapeType: ScrapeType) => {
     setLoading(true);
@@ -74,9 +80,16 @@ function App() {
     }
   };
 
+  // Show welcome landing page
+  if (showWelcome) {
+    return <WelcomeLanding onGetStarted={handleGetStarted} />;
+  }
+
+  // Original app interface
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* ... rest of your original App.tsx code remains exactly the same ... */}
         <header className="mb-12 text-center relative">
           <button
             onClick={toggleTheme}
