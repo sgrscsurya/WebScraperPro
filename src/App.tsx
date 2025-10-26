@@ -6,6 +6,7 @@ import HistoryPanel from './components/HistoryPanel';
 import WelcomeLanding from './components/WelcomeLanding';
 import { supabase } from './lib/supabase';
 import { useTheme } from './contexts/ThemeContext';
+import { useAuth } from './contexts/AuthContext';
 
 interface ScrapingResult {
   id: string;
@@ -20,6 +21,7 @@ interface ScrapingResult {
 
 function App() {
   const { isDark, toggleTheme } = useTheme();
+  const { user, isAuthenticated, signOut } = useAuth();
   const [loading, setLoading] = useState(false);
   const [currentResult, setCurrentResult] = useState<ScrapingResult | null>(null);
   const [showHistory, setShowHistory] = useState(false);
@@ -28,6 +30,7 @@ function App() {
 
   const handleGetStarted = () => {
     setShowWelcome(false);
+    console.log('Get Started clicked');
   };
 
   const handleBackToHome = () => {
@@ -86,36 +89,36 @@ function App() {
   };
 
   const handleDeleteHistory = async (id: string) => {
-  console.log('🗑️ handleDeleteHistory called with ID:', id);
-  try {
-    console.log('📡 Making Supabase delete request...');
-    const { data, error } = await supabase
-      .from('scraping_history')
-      .delete()
-      .eq('id', id)
-      .select();
+    console.log('🗑️ handleDeleteHistory called with ID:', id);
+    try {
+      console.log('📡 Making Supabase delete request...');
+      const { data, error } = await supabase
+        .from('scraping_history')
+        .delete()
+        .eq('id', id)
+        .select();
 
-    console.log('📦 Supabase response - data:', data, 'error:', error);
+      console.log('📦 Supabase response - data:', data, 'error:', error);
 
-    if (error) {
-      console.error('❌ Supabase error:', error);
-      throw error;
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('✅ Delete successful');
+      // REMOVED: setRefreshTrigger(prev => prev + 1);
+      
+      if (currentResult?.id === id) {
+        console.log('🗑️ Clearing current result');
+        setCurrentResult(null);
+      }
+    } catch (error) {
+      console.error('❌ Error deleting history item:', error);
+      alert('Failed to delete history item: ' + (error as Error).message);
+      // If delete fails, we should refresh to get the correct state
+      setRefreshTrigger(prev => prev + 1);
     }
-    
-    console.log('✅ Delete successful');
-    // REMOVED: setRefreshTrigger(prev => prev + 1);
-    
-    if (currentResult?.id === id) {
-      console.log('🗑️ Clearing current result');
-      setCurrentResult(null);
-    }
-  } catch (error) {
-    console.error('❌ Error deleting history item:', error);
-    alert('Failed to delete history item: ' + (error as Error).message);
-    // If delete fails, we should refresh to get the correct state
-    setRefreshTrigger(prev => prev + 1);
-  }
-};
+  };
 
   // Show welcome landing page
   if (showWelcome) {
@@ -128,6 +131,28 @@ function App() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <header className="mb-12 text-center relative">
           <div className="absolute top-0 right-0 flex space-x-2">
+            {/* User Info & Auth Section */}
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-2">
+                <div className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-700 dark:text-gray-300">
+                  Welcome, {user?.name}!
+                </div>
+                <button
+                  onClick={signOut}
+                  className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all shadow-lg text-sm font-medium"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowWelcome(true)}
+                className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm font-medium"
+              >
+                Sign In
+              </button>
+            )}
+            
             <button
               onClick={handleBackToHome}
               className="p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg flex items-center space-x-2"
@@ -264,6 +289,27 @@ function App() {
                   </div>
                 </div>
               </div>
+
+              {/* User Status Card */}
+              {isAuthenticated && (
+                <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl shadow-lg p-6 text-white">
+                  <h3 className="text-lg font-bold mb-3">Account Status</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Plan:</span>
+                      <span className="font-semibold capitalize">{user?.plan}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Scrapes Today:</span>
+                      <span className="font-semibold">12/50</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Status:</span>
+                      <span className="font-semibold text-green-300">Active</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

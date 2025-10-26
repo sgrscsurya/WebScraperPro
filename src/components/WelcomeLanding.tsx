@@ -12,11 +12,16 @@ import {
   CheckCircle, 
   Github, 
   Star,
+  X,
   Moon,
   Sun,
-  X
+  LogIn
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import SignUp from './SignUp';
+import SignIn from './SignIn';
+import ForgotPassword from './ForgotPassword';
 
 interface WelcomeLandingProps {
   onGetStarted: () => void;
@@ -24,9 +29,13 @@ interface WelcomeLandingProps {
 
 function WelcomeLanding({ onGetStarted }: WelcomeLandingProps) {
   const { isDark, toggleTheme } = useTheme();
+  const { user, isAuthenticated, signOut } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [showSignUp, setShowSignUp] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const features = [
     {
@@ -102,8 +111,47 @@ function WelcomeLanding({ onGetStarted }: WelcomeLandingProps) {
     }
   };
 
+    const handleSignIn = () => {
+    setShowSignIn(true);
+    setShowSignUp(false);
+  };
+
+  const handleSignUp = () => {
+    setShowSignUp(true);
+    setShowSignIn(false);
+  };
+
+  const handleForgotPassword = () => {
+    setShowForgotPassword(true);
+    setShowSignIn(false);
+  };
+
+  const handleCloseAuth = () => {
+    setShowSignUp(false);
+    setShowSignIn(false);
+    setShowForgotPassword(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300 overflow-hidden">
+      {/* Auth Modals */}
+      {showSignUp && (
+        <SignUp onSignIn={handleSignIn} onClose={handleCloseAuth} />
+      )}
+      {showSignIn && (
+        <SignIn 
+          onSignUp={handleSignUp} 
+          onClose={handleCloseAuth}
+          onForgotPassword={handleForgotPassword}
+        />
+      )}
+      {showForgotPassword && (
+        <ForgotPassword 
+          onSignIn={handleSignIn}
+          onClose={handleCloseAuth}
+        />
+      )}
+      
       {/* Video Modal */}
       {showVideo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm">
@@ -168,8 +216,30 @@ function WelcomeLanding({ onGetStarted }: WelcomeLandingProps) {
             </div>
             <span className="text-xl font-bold text-gray-900 dark:text-white">Web Scraper Pro</span>
           </div>
-          
+
           <div className="flex items-center space-x-4">
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-700 dark:text-gray-300">
+                  Welcome, {user?.name}!
+                </span>
+                <button
+                  onClick={signOut}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleSignIn}
+                className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                <LogIn className="h-4 w-4" />
+                <span>Sign In</span>
+              </button>
+            )}
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm"
@@ -228,6 +298,15 @@ function WelcomeLanding({ onGetStarted }: WelcomeLandingProps) {
               <Play className="h-5 w-5 text-blue-600" />
               <span>Watch Demo</span>
             </button>
+
+          {!isAuthenticated && (
+              <button 
+                onClick={handleSignUp}
+                className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-3 text-lg font-semibold"
+              >
+                <span>Sign Up Free</span>
+              </button>
+            )}
           </div>
 
           {/* Stats */}
