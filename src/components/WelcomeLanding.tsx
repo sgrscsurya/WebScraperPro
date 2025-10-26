@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { 
   Code2, 
   Sparkles, 
@@ -13,7 +13,8 @@ import {
   Github, 
   Star,
   Moon,
-  Sun 
+  Sun,
+  X
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -24,6 +25,8 @@ interface WelcomeLandingProps {
 function WelcomeLanding({ onGetStarted }: WelcomeLandingProps) {
   const { isDark, toggleTheme } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const features = [
     {
@@ -84,8 +87,71 @@ function WelcomeLanding({ onGetStarted }: WelcomeLandingProps) {
     { value: "24/7", label: "Availability" }
   ];
 
+  const handleVideoEnd = () => {
+    setShowVideo(false);
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+    }
+  };
+
+  const handleCloseVideo = () => {
+    setShowVideo(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300 overflow-hidden">
+      {/* Video Modal */}
+      {showVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm">
+          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full mx-4 overflow-hidden">
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Web Scraper Pro Demo
+              </h3>
+              <button
+                onClick={handleCloseVideo}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              </button>
+            </div>
+            
+            {/* Video Player */}
+            <div className="relative">
+              <video
+                ref={videoRef}
+                className="w-full h-auto max-h-[70vh]"
+                controls
+                autoPlay
+                onEnded={handleVideoEnd}
+              >
+                <source src="/sample_demo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+
+            {/* Controls Info */}
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Video will auto-close when finished</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span>Use player controls for playback</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 dark:bg-blue-900 rounded-full blur-3xl opacity-30 animate-pulse"></div>
@@ -155,7 +221,10 @@ function WelcomeLanding({ onGetStarted }: WelcomeLandingProps) {
               <ArrowRight className={`h-5 w-5 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''}`} />
             </button>
             
-            <button className="group px-8 py-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-3 text-lg font-semibold">
+            <button 
+              onClick={() => setShowVideo(true)}
+              className="group px-8 py-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-3 text-lg font-semibold"
+            >
               <Play className="h-5 w-5 text-blue-600" />
               <span>Watch Demo</span>
             </button>
@@ -268,18 +337,6 @@ function WelcomeLanding({ onGetStarted }: WelcomeLandingProps) {
 
         {/* Footer */}
         <footer className="text-center text-gray-500 dark:text-gray-400 text-sm border-t border-gray-200 dark:border-gray-800 pt-8">
-          <div className="flex items-center justify-center space-x-6 mb-4">
-            <button className="flex items-center space-x-2 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-              <Github className="h-5 w-5" />
-              <span>Star on GitHub</span>
-            </button>
-            <div className="flex items-center space-x-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star key={star} className="h-4 w-4 text-yellow-500 fill-current" />
-              ))}
-              <span className="ml-1">4.9/5</span>
-            </div>
-          </div>
           <p>© 2025 Web Scraper Pro. Built with React, Tailwind CSS, and Supabase.</p>
           <p className="mt-1">Use responsibly and respect website terms of service.</p>
         </footer>
