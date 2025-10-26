@@ -275,7 +275,7 @@ export default function HistoryPanel({ onSelectHistory, onDeleteHistory, refresh
           </div>
         </div>
 
-        <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-96 overflow-y-auto">
+        <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-96 overflow-y-auto history-scroll-container">
           {history.map((item) => (
             <div key={item.id} className="relative group">
               {deleteConfirmId === item.id ? (

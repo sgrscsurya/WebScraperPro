@@ -1,3 +1,97 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global Glassmorphic Scrollbar - No Background */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.6) transparent;
+}
+
+/* Webkit Scrollbar Base */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+::-webkit-scrollbar-track-piece {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Light Theme Scrollbar Thumb */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.7) 0%, 
+    rgba(139, 92, 246, 0.8) 50%, 
+    rgba(59, 130, 246, 0.7) 100%);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.9) 0%, 
+    rgba(139, 92, 246, 1) 50%, 
+    rgba(59, 130, 246, 0.9) 100%);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, 
+    rgba(37, 99, 235, 1) 0%, 
+    rgba(124, 58, 237, 1) 50%, 
+    rgba(37, 99, 235, 1) 100%);
+}
+
+/* Dark Theme Scrollbar Thumb */
+.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, 
+    rgba(96, 165, 250, 0.8) 0%, 
+    rgba(167, 139, 250, 0.9) 50%, 
+    rgba(96, 165, 250, 0.8) 100%);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, 
+    rgba(96, 165, 250, 1) 0%, 
+    rgba(167, 139, 250, 1) 50%, 
+    rgba(96, 165, 250, 1) 100%);
+}
+
+.dark ::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 1) 0%, 
+    rgba(139, 92, 246, 1) 50%, 
+    rgba(59, 130, 246, 1) 100%);
+}
+
+/* Firefox Support */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.6) transparent;
+}
+
+.dark {
+  scrollbar-color: rgba(139, 92, 246, 0.7) transparent;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
