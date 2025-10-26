@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Code2, History, Sparkles, Moon, Sun } from 'lucide-react';
+import { Code2, History, Sparkles, Moon, Sun, Home } from 'lucide-react';
 import ScraperForm, { ScrapeType } from './components/ScraperForm';
 import ResultsDisplay from './components/ResultsDisplay';
 import HistoryPanel from './components/HistoryPanel';
@@ -28,6 +28,11 @@ function App() {
 
   const handleGetStarted = () => {
     setShowWelcome(false);
+  };
+
+  const handleBackToHome = () => {
+    setShowWelcome(true);
+    setCurrentResult(null);
   };
 
   const handleScrape = async (url: string, scrapeType: ScrapeType) => {
@@ -80,6 +85,38 @@ function App() {
     }
   };
 
+  const handleDeleteHistory = async (id: string) => {
+  console.log('🗑️ handleDeleteHistory called with ID:', id);
+  try {
+    console.log('📡 Making Supabase delete request...');
+    const { data, error } = await supabase
+      .from('scraping_history')
+      .delete()
+      .eq('id', id)
+      .select();
+
+    console.log('📦 Supabase response - data:', data, 'error:', error);
+
+    if (error) {
+      console.error('❌ Supabase error:', error);
+      throw error;
+    }
+    
+    console.log('✅ Delete successful');
+    // REMOVED: setRefreshTrigger(prev => prev + 1);
+    
+    if (currentResult?.id === id) {
+      console.log('🗑️ Clearing current result');
+      setCurrentResult(null);
+    }
+  } catch (error) {
+    console.error('❌ Error deleting history item:', error);
+    alert('Failed to delete history item: ' + (error as Error).message);
+    // If delete fails, we should refresh to get the correct state
+    setRefreshTrigger(prev => prev + 1);
+  }
+};
+
   // Show welcome landing page
   if (showWelcome) {
     return <WelcomeLanding onGetStarted={handleGetStarted} />;
@@ -89,19 +126,28 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* ... rest of your original App.tsx code remains exactly the same ... */}
         <header className="mb-12 text-center relative">
-          <button
-            onClick={toggleTheme}
-            className="absolute top-0 right-0 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg"
-            aria-label="Toggle theme"
-          >
-            {isDark ? (
-              <Sun className="h-5 w-5 text-yellow-500" />
-            ) : (
-              <Moon className="h-5 w-5 text-gray-700" />
-            )}
-          </button>
+          <div className="absolute top-0 right-0 flex space-x-2">
+            <button
+              onClick={handleBackToHome}
+              className="p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg flex items-center space-x-2"
+              aria-label="Back to home"
+            >
+              <Home className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Home</span>
+            </button>
+            <button
+              onClick={toggleTheme}
+              className="p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg"
+              aria-label="Toggle theme"
+            >
+              {isDark ? (
+                <Sun className="h-5 w-5 text-yellow-500" />
+              ) : (
+                <Moon className="h-5 w-5 text-gray-700" />
+              )}
+            </button>
+          </div>
           <div className="flex items-center justify-center mb-4">
             <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-4 rounded-2xl shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20">
               <Code2 className="h-12 w-12 text-white" />
@@ -166,6 +212,7 @@ function App() {
               <div className={showHistory ? 'block' : 'hidden lg:block'}>
                 <HistoryPanel
                   onSelectHistory={handleSelectHistory}
+                  onDeleteHistory={handleDeleteHistory}
                   refreshTrigger={refreshTrigger}
                 />
               </div>
